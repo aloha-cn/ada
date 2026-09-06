@@ -685,8 +685,8 @@ std::optional<errors> url_pattern_parser<F>::add_part(
   }
   // If the result of running is a duplicate name given parser and name is
   // true, then throw a TypeError.
-  if (std::ranges::any_of(
-          parts, [&name](const auto& part) { return part.name == name; })) {
+  if (std::any_of(
+          parts.begin(), parts.end(), [&name](const auto& part) { return part.name == name; })) {
     return errors::type_error;
   }
   // Let encoded prefix be the result of running parser's encoding callback

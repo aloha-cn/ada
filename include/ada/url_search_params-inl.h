@@ -82,8 +82,8 @@ inline size_t url_search_params::size() const noexcept { return params.size(); }
 
 inline std::optional<std::string_view> url_search_params::get(
     const std::string_view key) {
-  auto entry = std::ranges::find_if(
-      params, [&key](const auto& param) { return param.first == key; });
+  auto entry = std::find_if(
+      params.begin(), params.end(), [&key](const auto& param) { return param.first == key; });
 
   if (entry == params.end()) {
     return std::nullopt;
@@ -106,14 +106,14 @@ inline std::vector<std::string> url_search_params::get_all(
 }
 
 inline bool url_search_params::has(const std::string_view key) noexcept {
-  auto entry = std::ranges::find_if(
-      params, [&key](const auto& param) { return param.first == key; });
+  auto entry = std::find_if(
+      params.begin(), params.end(), [&key](const auto& param) { return param.first == key; });
   return entry != params.end();
 }
 
 inline bool url_search_params::has(std::string_view key,
                                    std::string_view value) noexcept {
-  auto entry = std::ranges::find_if(params, [&key, &value](const auto& param) {
+  auto entry = std::find_if(params.begin(), params.end(), [&key, &value](const auto& param) {
     return param.first == key && param.second == value;
   });
   return entry != params.end();
@@ -127,8 +127,8 @@ inline std::string url_search_params::to_string() const {
     auto value = ada::unicode::percent_encode(params[i].second, character_set);
 
     // Performance optimization: Move this inside percent_encode.
-    std::ranges::replace(key, ' ', '+');
-    std::ranges::replace(value, ' ', '+');
+    std::replace(key.begin(), key.end(), ' ', '+');
+    std::replace(value.begin(), value.end(), ' ', '+');
 
     if (i != 0) {
       out += "&";
@@ -144,7 +144,7 @@ inline void url_search_params::set(const std::string_view key,
                                    const std::string_view value) {
   const auto find = [&key](const auto& param) { return param.first == key; };
 
-  auto it = std::ranges::find_if(params, find);
+  auto it = std::find_if(params.begin(), params.end(), find);
 
   if (it == params.end()) {
     params.emplace_back(key, value);
@@ -170,7 +170,7 @@ inline void url_search_params::remove(const std::string_view key,
 inline void url_search_params::sort() {
   // Keys are expected to be valid UTF-8, but percent_decode can produce
   // arbitrary byte sequences. Handle truncated/invalid sequences gracefully.
-  std::ranges::stable_sort(params, [](const key_value_pair& lhs,
+  std::stable_sort(params.begin(), params.end(), [](const key_value_pair& lhs,
                                       const key_value_pair& rhs) {
     size_t i = 0, j = 0;
     uint32_t low_surrogate1 = 0, low_surrogate2 = 0;

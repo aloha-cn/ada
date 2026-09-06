@@ -19,7 +19,7 @@ namespace ada {
 
 bool url::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
-  if (std::ranges::any_of(input, ada::unicode::is_forbidden_host_code_point)) {
+  if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
     return is_valid = false;
   }
 
@@ -766,7 +766,7 @@ bool url::set_port(const std::string_view input) {
 
   // Find the first non-digit character to determine the length of digits
   auto first_non_digit =
-      std::ranges::find_if_not(trimmed, ada::unicode::is_ascii_digit);
+      std::find_if_not(trimmed.begin(), trimmed.end(), ada::unicode::is_ascii_digit);
   std::string_view digits_to_parse =
       std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
 
@@ -854,7 +854,7 @@ bool url::set_protocol(const std::string_view input) {
   view.append(":");
 
   std::string::iterator pointer =
-      std::ranges::find_if_not(view, unicode::is_alnum_plus);
+      std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
     url saved_url(*this);

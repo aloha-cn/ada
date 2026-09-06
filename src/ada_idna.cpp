@@ -5833,8 +5833,8 @@ bool is_label_valid(const std::u32string_view label) {
   // Range membership via lower_bound on range end.
   const std::span<const uint32_t[2]> comb_span{combining_ranges,
                                                combining_range_count};
-  const auto comb_it = std::ranges::lower_bound(
-      comb_span, label.front(), {}, [](const auto& range) { return range[1]; });
+  const auto comb_it = std::lower_bound(
+      comb_span.begin(), comb_span.end(), label.front(), [](const auto& range, uint32_t value) { return range[1] < value; });
   if (comb_it != comb_span.end() && label.front() >= (*comb_it)[0]) {
     return false;
   }
@@ -5911,7 +5911,7 @@ bool is_label_valid(const std::u32string_view label) {
     uint32_t c = label[i];
     if (c == 0x200c) {
       if (i > 0) {
-        if (std::ranges::binary_search(virama, label[i - 1])) {
+        if (std::binary_search(std::begin(virama), std::end(virama), label[i - 1])) {
           return true;
         }
       }
@@ -5920,12 +5920,12 @@ bool is_label_valid(const std::u32string_view label) {
       }
       // we go backward looking for L or D
       auto is_l_or_d = [](uint32_t code) {
-        return std::ranges::binary_search(L, code) ||
-               std::ranges::binary_search(D, code);
+        return std::binary_search(std::begin(L), std::end(L), code) ||
+               std::binary_search(std::begin(D), std::end(D), code);
       };
       auto is_r_or_d = [](uint32_t code) {
-        return std::ranges::binary_search(R, code) ||
-               std::ranges::binary_search(D, code);
+        return std::binary_search(std::begin(R), std::end(R), code) ||
+               std::binary_search(std::begin(D), std::end(D), code);
       };
       std::u32string_view before = label.substr(0, i);
       std::u32string_view after = label.substr(i + 1);
@@ -5935,7 +5935,7 @@ bool is_label_valid(const std::u32string_view label) {
               after.end());
     } else if (c == 0x200d) {
       if (i > 0) {
-        if (std::ranges::binary_search(virama, label[i - 1])) {
+        if (std::binary_search(std::begin(virama), std::end(virama), label[i - 1])) {
           return true;
         }
       }
@@ -6176,7 +6176,7 @@ inline bool is_forbidden_domain_code_point(const char c) noexcept {
 }
 
 bool contains_forbidden_domain_code_point(std::string_view view) {
-  return std::ranges::any_of(view, is_forbidden_domain_code_point);
+  return std::any_of(view.begin(), view.end(), is_forbidden_domain_code_point);
 }
 
 // Per the WHATWG URL "domain to ASCII" algorithm, when beStrict is false and
@@ -6568,9 +6568,9 @@ bool valid_name_code_point(char32_t code_point, bool first) {
             : std::span<const uint32_t[2]>{ada::idna::id_continue,
                                            ada::idna::id_continue_count};
 
-  const auto iter = std::ranges::lower_bound(
-      ranges, code_point, {},
-      [](const auto& range) { return range[1]; });  // project to range-high
+  const auto iter = std::lower_bound(
+      ranges.begin(), ranges.end(), code_point,
+      [](const auto& range, uint32_t value) { return range[1] < value; });  // project to range-high
 
   return iter != ranges.end() && code_point >= (*iter)[0];
 }

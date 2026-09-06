@@ -354,7 +354,7 @@ tl::expected<std::string, errors> canonicalize_ipv6_hostname(
     std::string_view input) {
   ada_log("canonicalize_ipv6_hostname input=", input);
   // TODO: Optimization opportunity: Use lookup table to speed up checking
-  if (std::ranges::any_of(input, [](char c) {
+  if (std::any_of(input.begin(), input.end(), [](char c) {
         return c != '[' && c != ']' && c != ':' &&
                !unicode::is_ascii_hex_digit(c);
       })) {
@@ -389,7 +389,7 @@ tl::expected<std::string, errors> canonicalize_port(
 
   // Find the first non-digit character
   auto first_non_digit =
-      std::ranges::find_if_not(trimmed, unicode::is_ascii_digit);
+      std::find_if_not(trimmed.begin(), trimmed.end(), unicode::is_ascii_digit);
   std::string_view digits_to_parse =
       std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
 
@@ -449,7 +449,7 @@ tl::expected<std::string, errors> canonicalize_port_with_protocol(
 
   // Find the first non-digit character
   auto first_non_digit =
-      std::ranges::find_if_not(trimmed, unicode::is_ascii_digit);
+      std::find_if_not(trimmed.begin(), trimmed.end(), unicode::is_ascii_digit);
   std::string_view digits_to_parse =
       std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
 

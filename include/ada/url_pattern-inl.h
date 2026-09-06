@@ -156,7 +156,7 @@ url_pattern_component<regex_provider>::compile(
 
   // Detect pattern type early to potentially skip expensive regex compilation
   const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
-  const bool has_regexp_groups = std::ranges::any_of(*part_list, has_regexp);
+  const bool has_regexp_groups = std::any_of(part_list->begin(), part_list->end(), has_regexp);
 
   url_pattern_component_type component_type =
       url_pattern_component_type::REGEXP;
